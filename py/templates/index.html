@@ -30,14 +30,13 @@ width: 75%;
 </style>
 <script src="static/js/jquery-2.1.1.min.js"></script>
 <script src="static/js/jquery.mobile-1.4.4.min.js"></script>
-<script src="static/js/transit.js"></script>
 <script src='static/js/maintest.js'></script>
 </head>
 <body>
 
 <div data-role="page" id='home' data-theme='b'>
   <div data-role="header">
-    <h1>Light Show Pi</h1>
+    <h1>LightShow Pi</h1>
 	<a href='#leftpanel1' data-icon='arrow-r' data-iconpos='notext' data-theme='g' class='playlistStatus'></a>
   </div>
   <div data-role="main" class="ui-content" style='text-align:center'>
@@ -55,8 +54,7 @@ width: 75%;
 	</form>
 	<a href="#" id='lightsOn' data-role='button' data-theme='g' data-icon='check' data-inline='true'>Lights On</a>
 	<a href="#" id='lightsOff' data-role='button' data-theme='f' data-icon='delete' data-inline='true'>Lights Off</a>
-	<!--<a href="#" id='applysettings' data-role='button' data-theme='f' data-icon='delete' data-inline='true'>applysettings</a>-->
-	<br/><a href="#" id='playallmusic' data-role='button' data-theme='e'>Play All Music</a><br/>
+	<!--<br/><a href="#" id='playallmusic' data-role='button' data-theme='e'>Play All Music</a><br/>-->
 	<ul data-role='listview' data-inset='true' data-theme='d'>
 	<li><a href='#playlists'>Playlists</a></li>
 	<li><a href='#songs'>Songs</a></li>
@@ -90,7 +88,7 @@ width: 75%;
 	<button id='newplaylist' data-theme='g' data-inline='true' data-icon='plus' type='button'>New Playlist</button>
 	<ul data-role='listview' data-inset='true' data-theme='d' id='playlistsul'>
 		<li data-theme='b' data-role="list-divider">Playlists</li>
-$for file in glob.glob(os.environ['SYNCHRONIZED_LIGHTS_HOME']+"/music/playlists/*.playlist"):
+$for file in glob.glob(os.environ['SYNCHRONIZED_LIGHTS_HOME']+"/music/**/*.playlist"):
     <li data-theme='d'><a class='playlist' href='#' id="$file">$os.path.basename(file)</a></li>
 	
 </ul><br/>
@@ -154,9 +152,9 @@ $for file in glob.glob(os.environ['SYNCHRONIZED_LIGHTS_HOME']+"/music/playlists/
 					<br/>
 		<ul data-role='listview' data-inset='true' data-theme='d'>
 			<li data-theme='b' data-role="list-divider">Songs</li>
-$for file in glob.glob(os.environ['SYNCHRONIZED_LIGHTS_HOME']+"/music/*.mp3"):
+$for file in glob.glob(os.environ['SYNCHRONIZED_LIGHTS_HOME']+"/music/**/*.mp3"):
 			<li data-theme='d'><a class='song' href='#' id="$file">$os.path.basename(file)</a></li>
-$for file in glob.glob(os.environ['SYNCHRONIZED_LIGHTS_HOME']+"/music/*.wav"):
+$for file in glob.glob(os.environ['SYNCHRONIZED_LIGHTS_HOME']+"/music/**/*.wav"):
 			<li data-theme='d'><a class='song' href='#' id="$file">$os.path.basename(file)</a></li>
 $os.chdir(os.environ['SYNCHRONIZED_LIGHTS_HOME']+"/py")
 		</ul><br/>

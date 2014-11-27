@@ -152,6 +152,10 @@ def load_playlist(playlist_filename):
 
 class slc:
     '''Synchronized lights controller class (slc)'''
+    _no_song = {'name': "No song playing",
+                'filename': "",
+                'duration': -1,
+                'position': -1}
     
     def __init__(self):
         '''Constructor, initialize state of the lightshow'''
@@ -163,10 +167,7 @@ class slc:
         self.stop_now = False
         self.playing = False
         self.current_playlist = load_playlist(slc._PLAYLIST_PATH)
-        self.current_song = {'name': "No song playing",
-                             'filename': '',
-                             'duration': -1,
-                             'position': -1}
+        self.current_song = slc._no_song.copy()
 
     def loadConfig(self):
         # Configurations - TODO(todd): Move more of this into configuration manager
@@ -346,26 +347,36 @@ class slc:
         self.current_playlist = playlist
         self.current_song = {'name': current_song[0],
                              'filename': current_song[1],
-                             'votes': current_song[2]}
+                             'votes': current_song[2],
+                             'duration': -1,
+                             'position': -1}
         return self.current_song
 
     def play_playlist(self, playlist_filename):
         '''Play songs from the given playlist until stop() is called'''
-        while self.stop_now == False:
+        while not self.stop_now:
             print "play playlist: " + playlist_filename
             self.play(self.get_next_song(playlist_filename)['filename'])
         
     def stop(self):
         '''Stop playing current song / playlist - does not return until song is stopped'''
         self.stop_now = True
+
+        # Wait until the stop is successful before returning
         while self.playing:
             time.sleep(0.1)
+
+        # Reset the current song to nothing
+        self.current_song = slc._no_song.copy()
         self.stop_now = False
     
     # TODO(todd): Refactor more of this to make it more readable / modular.
     def play(self, song_filename):
         '''Play the specified song.'''
         song_filename = song_filename.replace("$SYNCHRONIZED_LIGHTS_HOME", cm.HOME_DIR)
+        self.current_song['filename'] = song_filename
+        if self.current_song['name'] == "No song playing":
+            self.current_song['name'] = song_filename
 
         # Handle the pre-show
         play_now = int(cm.get_state('play_now', 0))
@@ -447,8 +458,7 @@ class slc:
                                                        slc._CUSTOM_CHANNEL_FREQUENCIES)
 
         self.playing = True
-        self.current_song['filename'] = song_filename
-        while data != '' and not play_now:
+        while data != '' and not play_now and not self.stop_now:
             self.current_song['position'] = musicfile.tell() / sample_rate
             
             if slc._usefm=='true':

@@ -79,7 +79,7 @@ $(document).ready(function(){
 					for(temp2 in settingsObj[temp]){
 						$('#'+temp).append('<div class="ui-field-contain"><label for="'+temp2+'">'+temp2+'</label><input name="'+temp2+'" id="'+temp2+'" value="'+settingsObj[temp][temp2]+'"></div>');
 					}
-					$('#'+temp).append('<button data-inline="true" data-theme="a" class="saveChanges">Save Changes</button><button data-theme="g" data-inline="true" class="applyChanges">Apply Changes</button>');
+					$('#'+temp).append('<button data-inline="true" data-theme="g" class="saveChanges">Save Changes</button>');
 				}
 				$('#tabsul').html(ulVals);
 			}
