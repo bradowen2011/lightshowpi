@@ -146,6 +146,9 @@ fi
 #install beautiful soup
 sudo easy_install beautifulsoup4
 
+#install web.py
+sudo easy_install web.py
+
 # Explain to installer how they can test to see if we are working
 echo
 echo "You may need to reboot your Raspberry Pi before running lightshowPi (sudo reboot)."

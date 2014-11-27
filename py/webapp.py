@@ -3,12 +3,13 @@
 import web
 import glob
 import os
+
 import hardware_controller as hc
-import synchronized_lights as lights
+import synchronized_lights as lightshow
 
 template_dir = os.path.abspath(os.path.dirname(__file__)) + "/templates"
 
-slc=lights.slc()
+slc=lightshow.slc()
 env=os.environ['SYNCHRONIZED_LIGHTS_HOME']
 
 urls= (
@@ -32,49 +33,53 @@ class ajax:
         #print vars
         #return render.ajax(vars)
         if vars.option=='0':
-            slc.playlist(vars.playlist)
+            slc.stop()
+            slc.play_playlist(vars.playlist)
         elif vars.option=='1':
-            slc.playSingle(vars.song)
+            slc.stop()
+            slc.play(vars.song)
         elif vars.option=='3':
             slc.stop()
             hc.turn_on_lights()
         elif vars.option=='4':
             slc.stop()
             hc.turn_off_lights()
-        elif vars.option=='5':
-            return slc.getConfig()
-        elif vars.option=='6':
-            slc.setConfig(vars.object)
-        elif vars.option=='7':
-            slc.playAll()
+#         elif vars.option=='5':
+#             return slc.getConfig()
+#         elif vars.option=='6':
+#             slc.setConfig(vars.object)
+#         elif vars.option=='7':
+#             slc.playAll()
         elif vars.option=='8':
             str1='{"songs":['
-            for file in glob.glob(env+"/pi/lightshowpi/music/*.mp3"):
-                str1=str1+'["'+os.path.basename(file)+'","'+file+'"],'
+            for filename in glob.glob(env+"/music/sample/*.mp3"):
+                str1=str1+'["'+os.path.basename(filename)+'","'+filename+'"],'
             str1=str1[:-1]
             str1=str1+']}'
+            print str1
             return str1
         elif vars.option=='9':
-            #file = open("/home/pi/lightshowpi/music/playlists/"+vars.name+".playlist", "w")
-            file = open(env+"/music/playlists/"+vars.name+".playlist", "w")
-            file.write(vars.val)
-            file.close()
+            f = open(env+"/music/sample/"+vars.name+".playlist", "w")
+            f.write(vars.val)
+            f.close()
             str1='{"playlists":['
-            for file in glob.glob(env+"/music/playlists/*.playlist"):
-                str1=str1+'["'+os.path.basename(file)+'","'+file+'"],'
+            for filename in glob.glob(env+"/music/sample/*.playlist"):
+                str1=str1+'["'+os.path.basename(filename)+'","'+filename+'"],'
             str1=str1[:-1]
             str1=str1+']}'
+            print str1
             return str1
         elif vars.option=='10':
             os.remove(vars.playlist)
             str1='{"playlists":['
-            for file in glob.glob(env+"/music/playlists/*.playlist"):
-                str1=str1+'["'+os.path.basename(file)+'","'+file+'"],'
+            for filename in glob.glob(env+"/music/sample/*.playlist"):
+                str1=str1+'["'+os.path.basename(filename)+'","'+filename+'"],'
             str1=str1[:-1]
             str1=str1+']}'
+            print str1
             return str1
-        elif vars.option=='11':
-            slc.applySettings()
+#         elif vars.option=='11':
+#             slc.applySettings()
 
 class getVars:
     #def GET(self):        
@@ -82,10 +87,12 @@ class getVars:
     def POST(self):        
         #return render.getvars()
         str1=''
-        for temp in slc.current_playlist:
+        for temp in slc.current_playlist['songs']:
             str1=str1+'"'+temp[0]+'",'
         str1=str1[:-1]
-        return '{"currentsong":"'+slc.current_song_name+'","duration":"'+str(slc.duration)+'","currentpos":"'+str(slc.current_position)+'","playlist":['+str1+'],"playlistplaying":"'+slc.playlistplaying+'"}'
+        response = '{"currentsong":"'+slc.current_song['name']+'","duration":"'+str(slc.current_song['duration'])+'","currentpos":"'+str(slc.current_song['position'])+'","playlist":['+str1+'],"playlistplaying":"'+slc.current_song['name']+'"}'
+        print response
+        return response
 
 class upload:
     def POST(self):      
@@ -113,7 +120,8 @@ class upload:
 
 if __name__ == "__main__": 
     #print web.__version__
-    #print env
+    hc.initialize()
     app = web.application(urls, globals())
     app.run()
+    hc.clean_up()
     

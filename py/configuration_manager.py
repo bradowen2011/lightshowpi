@@ -117,7 +117,7 @@ def lightshow():
             try:
                 preshow = json.loads(_LIGHTSHOW_CONFIG['preshow_configuration'])
             except Exception as e:
-                logging.error("Preshow_configuration not defined or not in JSON format." + str(e))
+                logging.warning("Preshow_configuration not defined or not in JSON format: " + str(e))
         
         _LIGHTSHOW_CONFIG['preshow'] = preshow
 
