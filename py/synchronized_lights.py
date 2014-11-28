@@ -355,12 +355,13 @@ class slc:
     def play_playlist(self, playlist_filename):
         '''Play songs from the given playlist until stop() is called'''
         while not self.stop_now:
-            print "play playlist: " + playlist_filename
+            logging.info("playing next song in playlist: " + playlist_filename)
             self.play(self.get_next_song(playlist_filename)['filename'])
         
     def stop(self):
         '''Stop playing current song / playlist - does not return until song is stopped'''
         self.stop_now = True
+        logging.debug("waiting for current playback to stop")
 
         # Wait until the stop is successful before returning
         while self.playing:
@@ -369,6 +370,7 @@ class slc:
         # Reset the current song to nothing
         self.current_song = slc._no_song.copy()
         self.stop_now = False
+        logging.debug("playback has stopped")
     
     # TODO(todd): Refactor more of this to make it more readable / modular.
     def play(self, song_filename):
@@ -503,6 +505,7 @@ class slc:
     
         # Song is done playing
         self.playing = False
+        logging.debug("finished playing " + song_filename)
 
     def parse_args(self):
         '''Parse command line arguments used by the synchronized lightshow controller (slc)'''
