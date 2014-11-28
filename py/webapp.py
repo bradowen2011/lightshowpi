@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+#
+# Licensed under the BSD license.  See full license in LICENSE file.
+# http://www.lightshowpi.com/
+#
+# Author: Stephen Burning
+# Author: Todd Giles (todd@lightshowpi.com)
+"""Web interface for Lightshow Pi
+
+Start the webserver on port 80:
+  sudo webapp.py 80
+
+Then visit it on your local network (replace with your RPi's IP address):
+  http://192.168.X.Y/
+
+glob2: for easier listing of music files / playlists
+web: web.py for basic web server - http://webpy.org
+"""
 
 import web
 import glob2 as glob
@@ -22,10 +39,12 @@ urls= (
 render = web.template.render(template_dir, globals={'glob':glob,'os':os,'slc':slc})
 
 class index:
+    '''Renders the main index template - i.e. the main entry point'''
     def GET(self):        
         return render.index()
 
 class ajax:
+    '''Handles ajax requests from the webapp'''
     def POST(self):        
         vars = web.input()
         # TODO(toddgiles): Make options a bit more readable (rather than #s)
@@ -79,6 +98,7 @@ class ajax:
             return response
 
 class getVars:
+    '''Retrieves current state of the lightshow'''
     def POST(self):        
         playlist = ''
         for temp in slc.current_playlist['songs']:
@@ -88,6 +108,7 @@ class getVars:
         return response
 
 class upload:
+    '''Handles uploading photo(s) via the web interface'''
     def POST(self):      
         # TODO(todd): Make this location configurable via config file
         # TODO(todd): Allow adding to sub-directories
@@ -104,7 +125,6 @@ class upload:
             fout.close() # closes the file, upload complete.
         
 if __name__ == "__main__": 
-    #print web.__version__
     hc.initialize()
     app = web.application(urls, globals())
     app.run()
