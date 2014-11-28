@@ -11,6 +11,27 @@ function refreshPlaylistUL(data){
 	$('#playlistsul').html(temp1).listview('refresh');
 }
 
+var sliderTimer = null;
+function updatePlaybackSlider(currentpos){
+	if (sliderTimer) {
+		clearTimeout(sliderTimer)
+		sliderTimer = null
+	}
+	
+    done = true;
+	$('.slider').each(function(){		
+		max = parseInt($(this).attr('max'), 10);		
+		if (currentpos < max) {
+		    done = currentpos == -1;
+			try{$(this).val(currentpos).slider('refresh');}catch(e){}			
+		}
+	});
+	
+	if (!done) {
+		sliderTimer = setTimeout(function(){updatePlaybackSlider(currentpos + 1)},1000);
+	}
+}
+
 function getCurrentTrack(){
 		$.ajax({
 			type: 'POST',
@@ -23,20 +44,23 @@ function getCurrentTrack(){
 				//console.log(data);
 				
 				if(data.currentsong!=''){
-				$('.currentsong').html(data.currentsong);
-				$('.currentpos').html(data.currentpos);
-				$('.duration').html(data.duration);
-				if(data.duration!=0)
-				{
-					$('.slider').attr('max',data.duration);
-				}else
-				{
-					$('.slider').attr('max','100');
+					$('.currentsong').html(data.currentsong);
+					$('.currentpos').html(data.currentpos);
+					$('.duration').html(data.duration);
+					if(data.duration > 0) {
+						$('.slider').attr('max',data.duration);
+					} else {
+						$('.slider').attr('max','100');
+					}
+					
+					currentpos = parseInt(data.currentpos, 10)
+					duration = parseInt(data.duration, 10)
+					if (duration >= currentpos) {
+						updatePlaybackSlider(currentpos)
+					}
 				}
-				$('.slider').each(function(){
-					try{$(this).val(data.currentpos).slider('refresh');}catch(e){}
-				});
-				}
+				
+				
 				
 				var temp='';
 				for(var i=0;i<data.playlist.length;i++)
@@ -57,7 +81,8 @@ function getCurrentTrack(){
 			},
 			complete:function()
 			{
-				setTimeout(function(){getCurrentTrack()},1000);
+				// TODO(todd): Get an update after other events when we know a change is made.
+				setTimeout(function(){getCurrentTrack()},10000);
 			}
 		});
 		
