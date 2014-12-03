@@ -42,7 +42,7 @@ Third party dependencies:
 
 alsaaudio: for audio input/output - http://pyalsaaudio.sourceforge.net/
 decoder.py: decoding mp3, ogg, wma, ... - https://pypi.python.org/pypi/decoder.py/1.5XB
-numpy: for FFT calcuation - http://www.numpy.org/
+numpy: for FFT calculation - http://www.numpy.org/
 """
 
 import argparse
@@ -54,6 +54,7 @@ import os
 import random
 import subprocess
 import sys
+from threading import Timer
 import wave
 
 import alsaaudio as aa
@@ -402,11 +403,20 @@ def play_song():
 
             logging.debug("std: " + str(std) + ", mean: " + str(mean))
         except IOError:
-            logging.warn("Cached sync data song_filename not found: '" + cache_filename
+            logging.warn("Cached sync data file not found: '" + cache_filename
                          + ".  One will be generated.")
 
-    # Process audio song_filename
-    row = 0
+    # Determine amount to delay showing the lights
+    delay_lights_s = -cm.lightshow()['delay_audio_s']
+    skip_rows = 0
+    if delay_lights_s < 0:
+        # We need to start lights before music, so we need to skip ahead on the lights
+        chunk_period = CHUNK_SIZE / sample_rate
+        skip_rows = int(-delay_lights_s / chunk_period)
+        delay_lights_s = -delay_lights_s - delay_lights_s * skip_rows
+
+    # Process audio file
+    row = skip_rows
     data = musicfile.readframes(CHUNK_SIZE)
     frequency_limits = calculate_channel_frequency(_MIN_FREQUENCY,
                                                    _MAX_FREQUENCY,
@@ -424,6 +434,9 @@ def play_song():
         if cache_found and args.readcache:
             if row < len(cache_matrix):
                 matrix = cache_matrix[row]
+            elif row < len(cache_matrix) + skip_rows:
+                # No more lights to play due to audio delay
+                continue
             else:
                 logging.warning("Ran out of cached FFT values, will update the cache.")
                 cache_found = False
@@ -434,10 +447,14 @@ def play_song():
 
             # Add the matrix to the end of the cache 
             cache_matrix = np.vstack([cache_matrix, matrix])
-            
-        update_lights(matrix, mean, std)
 
-        # Read next chunk of data from music song_filename
+        # Update the lights (delayed if necessary)
+        if delay_lights_s > 0:
+            Timer(delay_lights_s, update_lights(matrix, mean, std)).start()
+        else:
+            update_lights(matrix, mean, std)
+
+        # Read next chunk of data from music file
         data = musicfile.readframes(CHUNK_SIZE)
         row = row + 1
 
