@@ -203,9 +203,9 @@ def audio_in():
         # Listen on the audio input device until CTRL-C is pressed
         while True:            
             l, data = stream.read()
-            output.write(data)
             
             if l:
+                output.write(data)
                 try:
                     matrix = fft.calculate_levels(data, CHUNK_SIZE, sample_rate, frequency_limits, input_channels)
                     if not np.isfinite(np.sum(matrix)):
