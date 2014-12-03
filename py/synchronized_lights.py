@@ -412,8 +412,8 @@ def play_song():
     if delay_lights_s < 0:
         # We need to start lights before music, so we need to skip ahead on the lights
         chunk_period = CHUNK_SIZE / sample_rate
-        skip_rows = int(-delay_lights_s / chunk_period)
-        delay_lights_s = -delay_lights_s - delay_lights_s * skip_rows
+        skip_rows = int(-delay_lights_s / chunk_period) + 1
+        delay_lights_s = chunk_period * skip_rows + delay_lights_s
 
     # Process audio file
     row = skip_rows
