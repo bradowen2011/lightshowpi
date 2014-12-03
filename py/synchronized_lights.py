@@ -361,12 +361,12 @@ def play_song():
         logging.info("Sending output as fm transmission")
         with open(os.devnull, "w") as dev_null:
             fm_process = subprocess.Popen(["sudo",cm.HOME_DIR + "/bin/pifm","-",str(frequency),"44100", "stereo" if play_stereo else "mono"], stdin=music_pipe_r, stdout=dev_null)
-    else:
-        output = aa.PCM(aa.PCM_PLAYBACK, aa.PCM_NORMAL)
-        output.setchannels(num_channels)
-        output.setrate(sample_rate)
-        output.setformat(aa.PCM_FORMAT_S16_LE)
-        output.setperiodsize(CHUNK_SIZE)
+
+    output = aa.PCM(aa.PCM_PLAYBACK, aa.PCM_NORMAL)
+    output.setchannels(num_channels)
+    output.setrate(sample_rate)
+    output.setformat(aa.PCM_FORMAT_S16_LE)
+    output.setperiodsize(CHUNK_SIZE)
     
     logging.info("Playing: " + song_filename + " (" + str(musicfile.getnframes() / sample_rate)
                  + " sec)")
@@ -414,10 +414,9 @@ def play_song():
                                                    _CUSTOM_CHANNEL_FREQUENCIES)
 
     while data != '' and not play_now:
+        output.write(data)
         if _usefm=='true':
             os.write(music_pipe_w, data)
-        else:
-            output.write(data)
 
         # Control lights with cached timing values if they exist
         matrix = None
