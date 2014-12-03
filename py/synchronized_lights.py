@@ -176,6 +176,13 @@ def audio_in():
     stream.setformat(aa.PCM_FORMAT_S16_LE) # Expose in config if needed
     stream.setrate(sample_rate)
     stream.setperiodsize(CHUNK_SIZE)
+
+    # Open output stream         
+    output = aa.PCM(aa.PCM_PLAYBACK, aa.PCM_NORMAL)
+    output.setchannels(input_channels)
+    output.setformat(aa.PCM_FORMAT_S16_LE)
+    output.setrate(sample_rate)
+    output.setperiodsize(CHUNK_SIZE)
          
     logging.debug("Running in audio-in mode - will run until Ctrl+C is pressed")
     print "Running in audio-in mode, use Ctrl+C to stop"
@@ -196,6 +203,7 @@ def audio_in():
         # Listen on the audio input device until CTRL-C is pressed
         while True:            
             l, data = stream.read()
+            output.write(data)
             
             if l:
                 try:
