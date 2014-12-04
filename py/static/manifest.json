@@ -1,0 +1,31 @@
+{
+"name": "LightShow Pi",
+"icons": [
+{
+"src": "/static/apple-touch-icon-iphone-60x60.png",
+"sizes": "60x60",
+"type": "image/png",
+"density": "1.0"
+},
+{
+"src": "/static/apple-touch-icon-ipad-76x76.png",
+"sizes": "76x76",
+"type": "image/png",
+"density": "1.5"
+},
+{
+"src": "/static/apple-touch-icon-iphone-retina-120x120.png",
+"sizes": "120x120",
+"type": "image/png",
+"density": "2.0"
+},
+{
+"src": "/static/apple-touch-icon-ipad-retina-152x152.png",
+"sizes": "152x152",
+"type": "image/png",
+"density": "3.0"
+},
+],
+"start_url": "/",
+"display": "standalone"
+}

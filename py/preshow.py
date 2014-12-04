@@ -21,6 +21,7 @@ import time
 import configuration_manager as cm
 import hardware_controller as hc
 
+
 class Preshow:
     '''The Preshow class handles all pre-show logic
     

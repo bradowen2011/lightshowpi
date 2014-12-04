@@ -117,7 +117,7 @@ def lightshow():
             try:
                 preshow = json.loads(_LIGHTSHOW_CONFIG['preshow_configuration'])
             except Exception as e:
-                logging.error("Preshow_configuration not defined or not in JSON format." + str(e))
+                logging.warning("Preshow_configuration not defined or not in JSON format: " + str(e))
         
         _LIGHTSHOW_CONFIG['preshow'] = preshow
 
@@ -196,6 +196,17 @@ def set_songs(song_list):
     global _SONG_LIST
     _SONG_LIST = song_list
 
+def get_config_json():
+    global CONFIG
+    results = '{'
+    for i in CONFIG.sections():
+        results = results + '"' + i + '":{'
+        options = CONFIG.options(i)
+        for j in options:
+            results = results + '"' + j + '":"' + CONFIG.get(i,j) + '",'
+        results = results[:-1] + '},'
+    results = results[:-1] + '}'
+    return json.dumps(results)
 
 ##############################
 # Application State Utilities
