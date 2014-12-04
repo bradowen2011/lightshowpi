@@ -17,7 +17,6 @@ wiringpi2: python wrapper around wiring pi - https://github.com/WiringPi/WiringP
 """
 
 import argparse
-import ast
 import logging
 import time
 
@@ -32,16 +31,13 @@ PIN_MODES = _CONFIG.get('hardware', 'pin_modes').split(',')
 _PWM_MAX = int(_CONFIG.get('hardware', 'pwm_range'))
 _ACTIVE_LOW_MODE = _CONFIG.getboolean('hardware', 'active_low_mode')
 _LIGHTSHOW_CONFIG = cm.lightshow()
+_HARDWARE_CONFIG = cm.hardware()
 _ALWAYS_ON_CHANNELS = [int(channel) for channel in
                        _LIGHTSHOW_CONFIG['always_on_channels'].split(',')]
 _ALWAYS_OFF_CHANNELS = [int(channel) for channel in
                         _LIGHTSHOW_CONFIG['always_off_channels'].split(',')]
 _INVERTED_CHANNELS = [int(channel) for channel in
                       _LIGHTSHOW_CONFIG['invert_channels'].split(',')]
-try:
-    _MCP23017 = ast.literal_eval(_CONFIG.get('hardware', 'mcp23017'))
-except:
-    _MCP23017 = 0
 
 # Initialize GPIO
 _GPIOASINPUT = 0
@@ -52,12 +48,6 @@ wiringpi.wiringPiSetup()
 # If only a single pin mode is specified, assume all pins should be in that mode
 if len(PIN_MODES) == 1:
     PIN_MODES = [PIN_MODES[0] for _ in range(GPIOLEN)]
-
-# Activate Port Expander If Defined
-if _MCP23017:
-    logging.info("Initializing MCP23017 Port Expander")
-    # set up the pins and i2c address
-    wiringpi.mcp23017Setup(_MCP23017['pin_base'], _MCP23017['i2c_addr'])
 
 # Check ActiveLowMode Configuration Setting
 if _ACTIVE_LOW_MODE:
@@ -75,6 +65,65 @@ else:
 
 
 # Functions
+def enable_device():
+    '''enable the specified device '''
+    try:
+        devices = _HARDWARE_CONFIG['devices']
+
+        for key in devices.keys():
+            device = key
+            device_slaves = devices[key]
+            
+            # mcp23017
+            if device.lower() == "mcp23017":
+                for slave in device_slaves:
+                    params = slave
+                    wiringpi.mcp23017Setup(int(params['pinBase']), int(params['i2cAddress'],16))
+            
+            # mcp23s17
+            elif device.lower() == "mcp23s17":
+                for slave in device_slaves:
+                    params = slave
+                    wiringpi.mcp23s17Setup(int(params['pinBase']), int(params['spiPort'],16), int(params['devId']))
+            
+            # TODO: Devices below need testing, these should work but could not verify due to lack of hardware
+            
+            # mcp23016
+            elif device.lower() == "mcp23016":
+                for slave in device_slaves:
+                    params = slave
+                    wiringpi.mcp23016Setup(int(params['pinBase']), int(params['i2cAddress'],16))
+
+            # mcp23s08 - Needs Testing
+            elif device.lower() == "mcp23008":
+                for slave in device_slaves:
+                    params = slave
+                    wiringpi.mcp23008Setup(int(params['pinBase']), int(params['i2cAddress'],16))
+
+            # mcp23s08 - Needs Testing
+            elif device.lower() == "mcp23s08":
+                for slave in device_slaves:
+                    params = slave
+                    wiringpi.mcp23s08Setup(int(params['pinBase']), int(params['spiPort'],16), int(params['devId']))
+
+            # sr595 - Needs Testing
+            elif device.lower() == "sr595":
+                for slave in device_slaves:
+                    params = slave
+                    wiringpi.sr595Setup(int(params['pinBase']), int(params['numPins']), int(params['dataPin']), int(params['clockPin']), int(params['latchPin']))
+            
+            # pcf8574
+            elif device.lower() == "pcf8574":
+                for slave in device_slaves:
+                    params = slave
+                    wiringpi.pcf8574Setup(int(params['pinBase']), int(params['i2cAddress'],16))
+
+            else:
+                logging.error("Device defined is not supported, please check your devices settings: " + str(device))
+    except Exception as e:
+        logging.debug("Error setting up devices, please check your devices settings.")
+        logging.debug(e)
+
 def is_pin_pwm(i):
     return PIN_MODES[i].lower() == "pwm"
 
@@ -92,7 +141,7 @@ def set_pin_as_output(i):
     '''Set the specified pin as an output.'''
     wiringpi.pinMode(_GPIO_PINS[i], _GPIOASOUTPUT)
     if is_pin_pwm(i):
-        wiringpi.softPwmCreate(i, 0, _PWM_MAX)
+        wiringpi.softPwmCreate(_GPIO_PINS[i], 0, _PWM_MAX)
 
 def set_pin_as_input(i):
     '''Set the specified pin as an input.'''
@@ -103,7 +152,7 @@ def turn_off_lights(usealwaysonoff=0):
     for i in range(GPIOLEN):
         if is_pin_pwm(i):
             # No overrides available for pwm mode pins
-            wiringpi.softPwmWrite(i, _PWM_OFF)
+            wiringpi.softPwmWrite(_GPIO_PINS[i], _PWM_OFF)
             continue
 
         if usealwaysonoff:
@@ -116,8 +165,8 @@ def turn_on_lights(usealwaysonoff=0):
     '''Turn on all the lights, but leave off all lights designated to be always off if specified.'''
     for i in range(GPIOLEN):
         if is_pin_pwm(i):
-            # No overrides avaialble for pwm mode pins
-            wiringpi.softPwmWrite(i, _PWM_ON)
+            # No overrides available for pwm mode pins
+            wiringpi.softPwmWrite(_GPIO_PINS[i], _PWM_ON)
             continue
 
         if usealwaysonoff:
@@ -129,8 +178,8 @@ def turn_on_lights(usealwaysonoff=0):
 def turn_off_light(i, useoverrides=0):
     '''Turn off the specified light, taking into account various overrides if specified.'''
     if is_pin_pwm(i):
-        # No overrides avaialble for pwm mode pins
-        wiringpi.softPwmWrite(i, _PWM_OFF)
+        # No overrides available for pwm mode pins
+        wiringpi.softPwmWrite(_GPIO_PINS[i], _PWM_OFF)
         return
 
     if useoverrides:
@@ -151,7 +200,7 @@ def turn_on_light(i, useoverrides=0, brightness=1.0):
             brightness = 0.0
         if brightness > 1.0:
             brightness = 1.0
-        wiringpi.softPwmWrite(i, int(brightness * _PWM_MAX))
+        wiringpi.softPwmWrite(_GPIO_PINS[i], int(brightness * _PWM_MAX))
         return
 
     if useoverrides:
@@ -170,6 +219,7 @@ def clean_up():
 
 def initialize():
     '''Set pins as outputs, and start all lights in the off state.'''
+    enable_device()
     set_pins_as_outputs()
     turn_off_lights()
 
@@ -177,7 +227,6 @@ def initialize():
 # __________________Main________________
 def main():
     '''main'''
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--state', choices=["off", "on", "flash", "fade", "cleanup"],
                         help='turn off, on, flash, or cleanup')

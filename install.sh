@@ -18,11 +18,17 @@ export PATH
 exec > >(tee install.log)
 
 #Root check
-if [ `whoami` != 'root' ]; then
-	echo "This must be run as root. usage sudo $0"
-	exit 1
-fi
-
+function check_uid {
+  if [ $UID != 0 ] ; then
+    echo "The lightshowpi installer requires root authority"
+    echo "If needed enter the password here :"
+    sudo $0
+    Exit_Command=$?
+    exit $Exit_Command
+  fi
+  return 0
+}
+check_uid
 
 function errchk {
 # basic error reporting
@@ -43,7 +49,7 @@ cd $BUILD_DIR
 git --version > /dev/null
 if [ $? -eq 1 ]; then
 	#Nope, install git
-	apt-get install -y git
+	sudo apt-get install -y git
     if [ $? -ne 0 ]; then
         errchk "git" $?
     fi
@@ -80,8 +86,8 @@ sudo ./build
 cd $BUILD_DIR
 
 #install wiringpi2-Python
-apt-get install -y python-dev python-setuptools
-git clone https://github.com/Gadgetoid/WiringPi2-Python.git
+sudo apt-get install -y python-dev python-setuptools
+git clone -b modelbplus https://github.com/Gadgetoid/WiringPi2-Python.git
 cd WiringPi2-Python
 sudo python setup.py install
     if [ $? -ne 0 ]; then
@@ -146,12 +152,10 @@ fi
 #install beautiful soup
 sudo easy_install beautifulsoup4
 
-#Test to see if we are working
-echo "test installation by attempting to blink all lights (press <CTRL>-C to stop the test)"
-cd $INSTALL_DIR
-
-sudo py/hardware_controller.py --state flash
-
-echo "If your lights blinked then this must have worked!"
+# Explain to installer how they can test to see if we are working
 echo
-echo "Reboot your Raspberry Pi before running lightshowPi (sudo reboot)"
+echo "You may need to reboot your Raspberry Pi before running lightshowPi (sudo reboot)."
+echo "Run the following command to test your installation and hardware setup (press CTRL-C to stop the test):"
+echo
+echo "sudo $INSTALL_DIR/py/hardware_controller.py --state flash"
+echo
