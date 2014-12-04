@@ -358,20 +358,21 @@ class slc:
             logging.info("playing next song in playlist: " + playlist_filename)
             self.play(self.get_next_song(playlist_filename)['filename'])
 
-    def play_playlist_SMS(self, playlist_filename):
-        '''Play songs from the given playlist until stop() is called'''
-        subprocess.Popen(["sudo",cm.HOME_DIR + "/bin/check_sms","--playlist=" + playlist_filename])
+    def start_sms(self, playlist_filename):
+        '''Play songs from the given playlist until stop() is called with SMS support'''
+        global smsprocess
+        smsprocess = subprocess.Popen(["sudo",cm.HOME_DIR + "/bin/check_sms","--playlist=" + playlist_filename])
 	logging.debug("check_sms started")
-        while not self.stop_now:
-            logging.info("playing next song in playlist: " + playlist_filename)
-            self.play(self.get_next_song(playlist_filename)['filename'])
         
     def stop(self):
         '''Stop playing current song / playlist - does not return until song is stopped'''
         self.stop_now = True
         logging.debug("waiting for current playback to stop")
-	os.system("pkill -f check_sms") # it's dirty but it works
-	logging.debug("killed check_sms")
+	try:
+            smsprocess.kill()
+	    logging.debug("killed check_sms")
+        except NameError:
+            logging.debug("check_sms not running")
 
         # Wait until the stop is successful before returning
         while self.playing:

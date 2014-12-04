@@ -15,6 +15,6 @@ if [ -z ${SYNCHRONIZED_LIGHTS_HOME} ]; then
 fi 
 
 while true; do
-  sudo python $SYNCHRONIZED_LIGHTS_HOME/py/check_sms.py $1
+  sudo python $SYNCHRONIZED_LIGHTS_HOME/py/check_sms.py $@
   sleep 15
 done

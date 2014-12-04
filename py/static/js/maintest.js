@@ -226,7 +226,7 @@ function progressHandlingFunction(e){
 		$.ajax({
 			type: 'POST',
 			url: '/ajax',
-			data: 'option=1&song='+selectedsong,
+			data: 'option=2&song='+selectedsong,
 			async: true
 		});
 	});
