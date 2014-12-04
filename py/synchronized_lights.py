@@ -360,7 +360,7 @@ class slc:
 
     def play_playlist_SMS(self, playlist_filename):
         '''Play songs from the given playlist until stop() is called'''
-        subprocess.Popen(["sudo",cm.HOME_DIR + "/bin/check_sms"])
+        subprocess.Popen(["sudo",cm.HOME_DIR + "/bin/check_sms","--playlist=" + playlist_filename])
 	logging.debug("check_sms started")
         while not self.stop_now:
             logging.info("playing next song in playlist: " + playlist_filename)
