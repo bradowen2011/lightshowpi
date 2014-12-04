@@ -247,6 +247,16 @@ function progressHandlingFunction(e){
 			async: true
 		});
 	});
+	$('#playNowlist_SMS').click(function()
+	{
+		$("#popupPlaylist").popup('close');
+		$.ajax({
+			type: 'POST',
+			url: '/ajax',
+			data: 'option=1&playlist='+selectedsong,
+			async: true
+		});
+	});
 	
 	$('#deletelist').click(function()
 	{

@@ -52,7 +52,11 @@ class ajax:
             # play playlist
             slc.stop()
             slc.play_playlist(vars.playlist)
-        elif vars.option=='1':
+        if vars.option=='1':
+            # play playlist w/SMS
+            slc.stop()
+            slc.play_playlist_SMS(vars.playlist)
+        elif vars.option=='2':
             # play single song
             slc.stop()
             slc.play(vars.song)
