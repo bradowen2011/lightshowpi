@@ -226,7 +226,7 @@ function progressHandlingFunction(e){
 		$.ajax({
 			type: 'POST',
 			url: '/ajax',
-			data: 'option=1&song='+selectedsong,
+			data: 'option=2&song='+selectedsong,
 			async: true
 		});
 	});
@@ -244,6 +244,16 @@ function progressHandlingFunction(e){
 			type: 'POST',
 			url: '/ajax',
 			data: 'option=0&playlist='+selectedsong,
+			async: true
+		});
+	});
+	$('#playNowlist_SMS').click(function()
+	{
+		$("#popupPlaylist").popup('close');
+		$.ajax({
+			type: 'POST',
+			url: '/ajax',
+			data: 'option=1&playlist='+selectedsong,
 			async: true
 		});
 	});

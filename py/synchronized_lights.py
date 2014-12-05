@@ -168,6 +168,7 @@ class slc:
         self.playing = False
         self.current_playlist = load_playlist(slc._PLAYLIST_PATH)
         self.current_song = slc._no_song.copy()
+        self.check_sms_process = None
 
     def loadConfig(self):
         # Configurations - TODO(todd): Move more of this into configuration manager
@@ -357,11 +358,20 @@ class slc:
         while not self.stop_now:
             logging.info("playing next song in playlist: " + playlist_filename)
             self.play(self.get_next_song(playlist_filename)['filename'])
+
+    def start_sms(self, playlist_filename):
+        '''Starts the check_sms process'''
+        self.check_sms_process = subprocess.Popen([cm.HOME_DIR + "/bin/check_sms","--playlist=" + playlist_filename])
+	    logging.debug("check_sms started")
         
     def stop(self):
         '''Stop playing current song / playlist - does not return until song is stopped'''
         self.stop_now = True
         logging.debug("waiting for current playback to stop")
+        if self.check_sms_process:
+            self.check_sms_process.kill()
+            logging.debug("killed check_sms")
+            self.check_sms_process = None
 
         # Wait until the stop is successful before returning
         while self.playing:
