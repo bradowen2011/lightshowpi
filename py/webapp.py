@@ -8,7 +8,7 @@
 """Web interface for Lightshow Pi
 
 Start the webserver on port 80:
-  sudo webapp.py 80
+  sudo python webapp.py 80
 
 Then visit it on your local network (replace with your RPi's IP address):
   http://192.168.X.Y/
