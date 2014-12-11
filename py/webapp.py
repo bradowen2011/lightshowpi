@@ -36,7 +36,7 @@ urls= (
     '/getvars','getVars',
     '/upload','upload'
 )
-render = web.template.render(template_dir, globals={'glob':glob,'os':os,'slc':slc})
+render = web.template.render(template_dir, cache=True, globals={'glob':glob,'os':os,'slc':slc})  #added cache=true to dramatically improve load time of page
 
 class index:
     '''Renders the main index template - i.e. the main entry point'''
@@ -131,6 +131,7 @@ class upload:
         
 if __name__ == "__main__": 
     hc.initialize()
+    web.config.debug = False  #Added to stop multiple instance of classes being created
     app = web.application(urls, globals())
     app.run()
     hc.clean_up()
