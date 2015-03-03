@@ -362,7 +362,7 @@ class slc:
     def start_sms(self, playlist_filename):
         '''Starts the check_sms process'''
         self.check_sms_process = subprocess.Popen([cm.HOME_DIR + "/bin/check_sms","--playlist=" + playlist_filename])
-	    logging.debug("check_sms started")
+	logging.debug("check_sms started")
         
     def stop(self):
         '''Stop playing current song / playlist - does not return until song is stopped'''

@@ -36,6 +36,9 @@ urls= (
     '/getvars','getVars',
     '/upload','upload'
 )
+
+app = web.application(urls, globals())
+
 render = web.template.render(template_dir, cache=True, globals={'glob':glob,'os':os,'slc':slc})  #added cache=true to dramatically improve load time of page
 
 class index:
@@ -55,7 +58,7 @@ class ajax:
         elif vars.option=='1':
             # play playlist w/SMS
             slc.stop()
-	        slc.start_sms(vars.playlist)
+	    slc.start_sms(vars.playlist)
             slc.play_playlist(vars.playlist)
         elif vars.option=='2':
             # play single song
@@ -131,8 +134,7 @@ class upload:
         
 if __name__ == "__main__": 
     hc.initialize()
-    web.config.debug = False  #Added to stop multiple instance of classes being created
-    app = web.application(urls, globals())
+    web.config.debug = False  #Added to stop multiple instance of classes being created   
     app.run()
     hc.clean_up()
     
