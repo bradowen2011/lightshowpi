@@ -19,6 +19,10 @@ def piff(val, chunk_size, sample_rate):
     """Return the power array index corresponding to a particular frequency."""
     return int(chunk_size * val / sample_rate)
 
+@lru_cache(maxsize=10)
+def hanning(size):
+    return np.hanning(size);
+
 def calculate_levels(data, chunk_size, sample_rate, frequency_limits, gpiolen, channels=2):
     """
     Calculate frequency response for each channel defined in frequency_limits
@@ -44,7 +48,7 @@ def calculate_levels(data, chunk_size, sample_rate, frequency_limits, gpiolen, c
     # if you take an FFT of a chunk of audio, the edges will look like
     # super high frequency cutoffs. Applying a window tapers the edges
     # of each end of the chunk down to zero.
-    window = np.hanning(len(data))
+    window = hanning(len(data))
     data = data * window
 
     # Apply FFT - real data
