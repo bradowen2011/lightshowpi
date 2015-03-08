@@ -2,6 +2,7 @@ var selectedsong;
 var settingsObj;
 //var files;
 	
+
 function refreshPlaylistUL(data){
 	var temp1="<li data-theme='b' data-role='list-divider'>Playlists</li>";
 	$('#popupNewPlaylist').popup('close');
@@ -87,6 +88,8 @@ function getCurrentTrack(){
 		});
 		
 	}
+	
+	
 $(document).ready(function(){
 	
 		$.ajax({
